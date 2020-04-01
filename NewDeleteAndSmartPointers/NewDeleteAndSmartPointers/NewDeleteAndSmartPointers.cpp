@@ -19,13 +19,19 @@ struct SomeObject
 	~SomeObject() {
 		std::cout << "Destroying object " << ObjNr << std::endl;
 	}
+	void PrintID() {
+		std::cout << "I'm object" << ObjNr;
+	}
 };
+
+void CheckWeakPointerExpired(std::weak_ptr<SomeObject>& wPtr0);
 
 int main()
 {
 	//create a scope
+
 	{
-		//try to avoid this, since it's not superclear
+		//both work
 		SomeObject testObject(1337);
 		SomeObject testObject2;
 
@@ -69,8 +75,51 @@ int main()
 		someObjectUniquePtrVector.clear();
 	}
 
+	{
+	//unique pointer (explicit ctor)
+	std::unique_ptr<SomeObject> uPtrSomeObject(new SomeObject());
+	//with make unique method - safer - if c'tor throws exception you won't end up with a dangling pointer with no reference
+	std::unique_ptr<SomeObject> uPtrSomeObject2 = std::make_unique<SomeObject>();
+	uPtrSomeObject->PrintID();
+	}
+
+	//shared ptr, reference counting mechanism
+	//allocates another block: the 'control block' used for reference counting
+	{
+		std::shared_ptr<SomeObject> sPtr0;
+		{
+
+		std::shared_ptr<SomeObject> sPtr1 = std::make_shared<SomeObject>();
+		sPtr0 = sPtr1;
+		}
+
+	} //will be destroyed here
+
+	//	//weak ptr, doesn't add to 'count' when ref counting
+	//
+	{
+		std::weak_ptr<SomeObject> wPtr0;
+		{
+
+			std::shared_ptr<SomeObject> sPtr1 = std::make_shared<SomeObject>();
+			wPtr0 = sPtr1;
+			CheckWeakPointerExpired(wPtr0);
+		} //will be destroyed here
+		CheckWeakPointerExpired(wPtr0);
+	}
 	std::cin.get();
 
 
 
+}
+
+void CheckWeakPointerExpired(std::weak_ptr<SomeObject>& ptr)
+{
+	//check if expired
+	if (!ptr.expired()) {
+		std::cout << "pointer is valid\n";
+	}
+	else {
+		std::cout << "pointer  is expired\n";
+	}
 }
