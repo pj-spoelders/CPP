@@ -74,7 +74,7 @@ int main()
 
         Entity* entityPtr0 = new Entity();
         //also demonstrates polymorfism
-        //!!! BE VERY CAREFUL HERE, YOU NEED A VIRTUAL DESTRUCTOR, otherwise you'll experience a possible memory leak
+        //!!! BE VERY CAREFUL HERE, YOU NEED A VIRTUAL DESTRUCTOR, otherwise only the base dtor will be called and you'll experience a possible memory leak
         Entity* entityPtr1 = new DerivedEntity();
 
         std::cout << "-------------" << std::endl;
@@ -85,9 +85,10 @@ int main()
         std::cout << "-------------" << std::endl;
 
         delete entityPtr0;
+        //!!! BE VERY CAREFUL HERE, YOU NEED A VIRTUAL DESTRUCTOR, otherwise only the base dtor will be called and you'll experience a possible memory leak
         delete entityPtr1;
 
-    //pure virtual/abstract class : can't initialize an object of this class
+    //pure virtual/abstract class : can't initialize/instantiate an object of this class
     //AbstractEntity ai;
 
 }
