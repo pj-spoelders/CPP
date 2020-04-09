@@ -148,6 +148,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GettingStarted.cpp" />
+    <ClCompile Include="NewClass.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="NewClass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
