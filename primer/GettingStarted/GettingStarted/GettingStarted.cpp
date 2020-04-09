@@ -8,7 +8,13 @@ void DoStuff(int& iPtr) {
     std::cout << iPtr << std::endl;;
 }
 int main()
+
 {
+    //you can't do this, makes sense,why would you
+    //int& refA = 42;
+    //but you can do this? but what's the point & why?
+    const int& refS = 42;
+    std::cout << refS;
 
     int iVal = 0x11;
     
@@ -35,6 +41,10 @@ int main()
     //reference to a pointer 
 
     int*& refToPt = iPtr;
+
+    const int* ptrToConst;//pointer to const
+    int* const constPtrToInt = &iVal;//const pointer
+    const int* const constPtrToConstInt = &iVal; // const pointer to const value
 }
 
 
