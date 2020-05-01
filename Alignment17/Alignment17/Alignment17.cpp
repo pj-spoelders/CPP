@@ -47,3 +47,7 @@ int main()
     //pAlignedType->~MyType();
     //::operator delete(pAlignedType, std::align_val_t{ 32 });
 }
+
+// 2GOOD RESOURCES:
+//https://www.bfilipek.com/2019/08/newnew-align.html (where this came form)
+//https://github.com/Twon/Alignment/blob/master/docs/alignment_in_C%2B%2B.md
