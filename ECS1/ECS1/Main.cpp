@@ -102,6 +102,10 @@ this is ofcourse a bit more specific and generally performance really isn't that
 We need to measure how much memory we use, and how long a given frame takes to calculate
 we also need an easy way to save and load our components so we can support save and loadgames
 */
+#include "Components.cpp""
 int main() {
+	int x = 1,  y = 2,  z = 3;
+	ECS1::ComponentContainer<ECS1::Position2D> cc(3) ;
+	cc.Set(5, 6, 7);
 
 }
