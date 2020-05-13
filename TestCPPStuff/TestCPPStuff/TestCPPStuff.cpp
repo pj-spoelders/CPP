@@ -1,57 +1,93 @@
-// TestCPPStuff.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 
 
+//#include "ProblemPolymorfism.h"
 #include <iostream>
+#include <string>
+
+void WL(std::string s) {
+	std::cout << s << std::endl;
+}
+void WS() {
+	WL("------------------------");
+}
+
 #include <vector>
-#include <utility>
-struct Base {
-	virtual void Drive() {
-		std::cout << "vroom" << std::endl;
+class TestClass {
+public:
+	TestClass() {
+		WL("Ctor");
+	}
+	TestClass(int i, int b) {
+		WL("Ctor (with params)");
+	}
+	~TestClass() {
+		WL("dtor");
+	}
+	TestClass(const TestClass& tc) {
+		WL("Copy Ctor");
+	}
+	TestClass(TestClass&& tc) {
+		WL("Move Ctor");
+	}
+	TestClass& operator=(const TestClass& tc) {
+		WL("Copy Assignment Op");
+	}
+	TestClass& operator=(TestClass&& tc) {
+		WL("Move Assignment Op");
 	}
 };
-struct DerivedClass :public Base{
-	virtual void Drive() override {
-		std::cout << "VRRR" << std::endl;
-	}
-};
-struct DerivedDerivedClass: public DerivedClass {
-	void Drive() override {
-		std::cout << "BEEP BEEP" << std::endl;
-	}
-};
+void TestMethodM(TestClass& tc) {
+	TestClass tcM = tc;
+}
+void TestMethodC(TestClass&& tc) {
+	TestClass tcM = tc;
+}
+void TestClassF() {
+
+}
+
+//https://en.cppreference.com/w/cpp/container/vector/emplace_back
+
+TestClass createTestClass() {
+	return TestClass();
+}
 int main()
 {
-	//1.this was your first problem
-	//polymorfism only works with pointers or references
-	//ideally use a unique_ptr here instead of a 'raw' ptr like Winjerome mnetioned
-	std::vector <Base*> vec;
-	vec.emplace_back( new DerivedClass());
-	vec.emplace_back( new DerivedDerivedClass());
-	auto it = vec.begin();
-	(*it)->Drive();//doesn't work
-	//2. this is your second problem here; the postfix only gets executed after it already 'returned' its iterator so it's still pointing to element 0
-	//(*it++)->Drive();
-	//you could use the prefix version
-	(*++it)->Drive();
-	//our you could increment the iterator using the prefix or postfix version and then call Drive after you've done so to make it all a bit less confusing
-	//it++;
-	//*it)->Drive();
 
-	//to prevent memory leaks you need to delete what you newed
-	for (auto element : vec) {
-		delete element;
-	}
+	//Problem1
+	//PolymorfismPrefixPostfixAndUniquePtr();
 
-	//same thing with unique pointers
-	std::vector <std::unique_ptr<Base>> vec2;
-	vec2.emplace_back(std::make_unique<DerivedClass>());
-	vec2.emplace_back(std::make_unique<DerivedDerivedClass>());
-	auto it2 = vec2.begin();
-	(*it2)->Drive();//doesn't work
-	(*++it2)->Drive();
+	//argument forwarding + construction
+	std::vector<TestClass> vecTestClass;
 
-	//now I don't need to delete the elements myself manually since unique_ptr will do this once unique_ptr goes out of scope and gets destroyed
+	//TO SOLVE ALL THE Copty Ctors Firing we'll just reserve some space here
+	vecTestClass.reserve(20);
+
+	//forwards arguments and then uses placement new internally
+	WS();
+	WL("Parameterless emplace back:");
+	vecTestClass.emplace_back();
+	WS();
+	WL("emplace back with parameters:");
+	//https://zpjiang.me/2018/08/08/Copy-Constructor-and-std-vector-emplace-back/ I Had a copy happening here, vector resizes itself leading to a copy of the first 1 element
+	vecTestClass.emplace_back(1, 2); //the compiler stops you from doing stupid stuff with this
+	WS();
+	WL("Push back Creating new instance of class using Ctor");
+	//move or copy
+	
+	vecTestClass.push_back(TestClass()); //same here 
+
+	WS();
+	WL("");
+	//this 'll do a copy ctor 
+	TestClass tc1;
+	WS();
+	vecTestClass.push_back(tc1);
+	WS();
+	WL("return function:");
+	//see what this does with a helperfunction
+	vecTestClass.push_back(createTestClass());
+	//it does RVO and then it moves
 
 }
 
