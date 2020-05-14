@@ -108,7 +108,13 @@ int main()
 	TestMethodC(tcMoved);
 	//
 	WS();
+	WL("This will move, the compiler gets this:");
+	TestMethodC(TestClass());
+	WS();
+	WL("Foring with std::move");
 	//unless you really force it to, like here,so the compiler knows what's up
+	TestMethodC(std::move(tcMoved));
+	WS();
 	TestMethodC(std::move(TestClass()));
 	WS();
 	
