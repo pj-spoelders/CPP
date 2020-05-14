@@ -36,10 +36,13 @@ public:
 		WL("Move Assignment Op");
 	}
 };
-void TestMethodM(TestClass& tc) {
+void TestMethodC(TestClass& tc) {
 	TestClass tcM = tc;
 }
 void TestMethodC(TestClass&& tc) {
+	TestClass tcM = std::move(tc);
+}
+void TestMethodM(TestClass&& tc) {
 	TestClass tcM = tc;
 }
 void TestClassF() {
@@ -49,6 +52,7 @@ void TestClassF() {
 //https://en.cppreference.com/w/cpp/container/vector/emplace_back
 
 TestClass createTestClass() {
+
 	return TestClass();
 }
 int main()
@@ -86,8 +90,30 @@ int main()
 	WS();
 	WL("return function:");
 	//see what this does with a helperfunction
+		//it does RVO and then it moves
 	vecTestClass.push_back(createTestClass());
-	//it does RVO and then it moves
+	WS();
+
+
+
+	TestClass tc;
+
+	TestClass tc2;
+	TestClass&& tcMoved = std::move(tc2);
+	//doesn't work
+	//TestMethodM(th);
+	//you need to std::move it to convert it to an rvalue reference)
+	WS();
+	//it will still pick the reference/copy version, because you might still use it later on or (might change with a different compiler)
+	TestMethodC(tcMoved);
+	//
+	WS();
+	//unless you really force it to, like here,so the compiler knows what's up
+	TestMethodC(std::move(TestClass()));
+	WS();
+	
+
+
 
 }
 
