@@ -40,6 +40,8 @@ void TestMethodC(TestClass& tc) {
 	TestClass tcM = tc;
 }
 void TestMethodC(TestClass&& tc) {
+	//TestClass tcM = tc;
+	//you need to do this or the compiler won't get it
 	TestClass tcM = std::move(tc);
 }
 void TestMethodM(TestClass&& tc) {
