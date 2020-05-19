@@ -150,6 +150,7 @@
     <ClCompile Include="ConcurrencyInAction.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CreateThreads.h" />
     <ClInclude Include="ThreadGuard.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

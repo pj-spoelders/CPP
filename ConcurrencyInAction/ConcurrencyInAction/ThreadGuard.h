@@ -1,6 +1,7 @@
 #pragma once
 #include <thread>
 
+
 //contains reference to thread and in dtor will call .join when the tg object goes out of scope, bit like a unique_ptr
 class thread_guard
 {
@@ -25,18 +26,21 @@ public:
 };
 struct func {
 private:
-	int ls;
+	int ls = 0;
 public:
 	func(int ls) {
-
+		ls = ls;
 	}
 	void operator ()() {
-
+		for (int i = 0; i <= 1000000; i++) {
+			ls +=  (ls%2) + (ls/2) + 1  ;
+		}
+		std::cout << "functor func: " << ls << std::endl;
 	}
 	
 
 };
-void fTG()
+void ThreadGuard()
 {
 	int some_local_state = 0;
 	func my_func(some_local_state);

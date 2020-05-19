@@ -4,85 +4,116 @@
 #include <iostream>
 #include <thread>
 
+#include "CreateThreads.h"
 #include "ThreadGuard.h"
-void hello()
-{
-	std::cout << "Hello concurrent world" << std::endl;
+
+
+void WS() {
+	std::cout << "--------------" << std::endl;
 }
-void do_some_work() {
-	std::cout << "Doing some worky work" << std::endl;
+void fBV(std::string val) {
+	val += " copy by value";
+	std::cout << val << std::endl;
 }
-class background_task
+void fBR(std::string& val) {
+	val += " pass by  ref";
+	std::cout << val << std::endl;
+}
+void fBP(std::string* val) {
+	*val += " pass by ptr";
+	std::cout << *val << std::endl;
+}
+void PassingArgumentsToAThreadFunction() {
+	std::string vV = "value -";
+	auto mtv = std::thread(fBV, vV);
+	mtv.join();
+	std::cout << vV << std::endl;
+	WS();
+	//you can't even do this anymore withoutd std::ref so NP
+	std::string vR = "value ref -";
+	std::string& vRR = vR;
+	auto mtr = std::thread(fBR, std::ref(vRR));
+	mtr.join();
+	std::cout << vR << std::endl;
+	WS();
+
+	std::string* vPtr = new std::string("value ptr -");
+	auto mtp = std::thread(fBP, vPtr);
+	mtp.join();
+	std::cout << *vPtr << std::endl;
+	WS();
+}
+
+//2.3
+//scoped threat example, transfers thread to guard class with move
+
+//class scoped_thread {
+//	std::thread t;
+//public:
+//	scoped_thread(std::thread t) : 
+//		t(std::move(t)) 
+//	{
+//		if (!t.joinable()) {
+//			//throw std::logic_error("No thread");
+//		}
+//
+//	}
+//	~scoped_thread() {
+//		if (t.joinable()) {
+//			t.join();
+//		}
+//	}
+//};
+
+class scoped_thread
 {
+	std::thread t;
 public:
-	void operator()() const //2d () is the arg list
+	explicit scoped_thread(std::thread t_) :
+		t(std::move(t_))
 	{
-		//do_something();
-		//do_something_else();
-		std::cout << "Doing some work from ftor" << std::endl;
+		if (!t.joinable())
+			throw std::logic_error("No thread");
 	}
+	~scoped_thread()
+	{
+		t.join();
+	}
+	scoped_thread(scoped_thread const&) = delete;
+	scoped_thread& operator=(scoped_thread const&) = delete;
 };
+
+void calcalot(int val) {
+	for (int i = 0; i <= 10000000; i++) {
+		val += (val % 2) + (val / 2) + 1;
+	}
+	std::cout << "calcalot: " << val << std::endl;
+}
+
 int main()
 {
-	//FUNCTION
-	std::thread my_thread(hello);
-	my_thread.join();
+	//1
+	CreateThreads();
 
-	//LAUNCHING A THREAD
-
-
-	std::thread my_threadWithFunction(do_some_work);
-
-	//FUNCTOR
-	//std::thread works with any
-	//callable type, so you can pass an instance of a class with a function call operator to the
-	//std::thread constructor instead :
-
-
-
-	background_task f;
-	std::thread my_threadFunctorInstance(f);
-
-
-	/*In this case, the supplied function object is copied into the storage belonging to the
-		newly created thread of executionand invoked from there.It’s therefore essential that
-		the copy behave equivalently to the original, or the result may not be what’s expected.
-		One thing to consider when passing a function object to the thread constructor is
-		to avoid what is dubbed “C++’s most vexing parse.” If you pass a temporary rather
-		17 Basic thread management
-		than a named variable, then the syntax can be the same as that of a function declara -
-		tion, in which case the compiler interprets it as such, rather than an object definition.
-		For example,*/
-	//std::thread my_threadFunctorTemporaryIssue(background_task());
-	/*declares a function my_thread that takes a single parameter(of type pointer to a func -
-		tion taking no parameters and returning a background_task object) and returns a
-		std::thread object, rather than launching a new thread.You can avoid this by nam -
-		ing your function object as shown previously, by using an extra set of parentheses, or
-		by using the new uniform initialization syntax, for example: */
-	std::thread my_threadDoubleParenthese((background_task()));
-	
-	std::thread my_threadInitializerSyntax{ background_task() };
-
-	//USING A LAMBDA
-	std::thread my_threadL([] {
-		std::cout << "lambdaing" << std::endl;
-		//do_something();
-		//do_something_else();
-		});
-
-	my_threadWithFunction.join();
-	my_threadFunctorInstance.join();
-	my_threadDoubleParenthese.join();
-	my_threadInitializerSyntax.join();
-	my_threadL.join();
-
-	//JOIN DISCARD AND THREAD GUARD
-	//you need to join or detach or std::abort will get triggered
-
+	//2 THREAD GUARDS
 	//keep exception safe code in mind so catch { .. join} in case you .join later
 	//or use a RAII-principle thread guard as the author suggests
 	//this isn't really needed for detach since you can execute that staement immediately
-	fTG();
+	ThreadGuard();
+
+	//2.3
+	PassingArgumentsToAThreadFunction();
+	auto t11 =std::thread{ func(10) };
+	t11.join();
+
+	WS();
+	//scoped_thread t(std::thread( calcalot,10) );
+	scoped_thread t(std::thread(calcalot,10));
+	scoped_thread tFunctor(std::thread{ func(10) });
+	std::cout << "Hello" << std::endl;
+
+	WS();
+	//this is only a hint and might be 0 so plan for that
+	std::cout << "hardware concurrency: " << std::thread::hardware_concurrency() << std::endl;
 
 }
-
