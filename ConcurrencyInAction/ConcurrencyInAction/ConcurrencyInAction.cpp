@@ -2,7 +2,11 @@
 //
 
 #include <iostream>
+
 #include <thread>
+#include <future>
+
+#include <chrono>
 
 #include "CreateThreads.h"
 #include "ThreadGuard.h"
@@ -89,6 +93,7 @@ void calcalot(int val) {
 	}
 	std::cout << "calcalot: " << val << std::endl;
 }
+int gcd(int x, int y) { return y ? gcd(y, x % y) : x; }
 
 int main()
 {
@@ -110,10 +115,50 @@ int main()
 	//scoped_thread t(std::thread( calcalot,10) );
 	scoped_thread t(std::thread(calcalot,10));
 	scoped_thread tFunctor(std::thread{ func(10) });
+	
+	//check out if you can still pass a non temporary this way
+	//std::thread tstNonTemp = std::thread(calcalot, 20);
+	//scoped_thread tNT(tstNonTemp);
+	//YOU CAN'T so you'd need to move the name var, using std::move, and maybe change the ctr thread argument to thread&& as to make it more clear, but the author's intention was probably to always use it this way
 	std::cout << "Hello" << std::endl;
 
 	WS();
 	//this is only a hint and might be 0 so plan for that
+
 	std::cout << "hardware concurrency: " << std::thread::hardware_concurrency() << std::endl;
+
+	//
+	std::cout << "max size to enable true sharing: " << std::hardware_constructive_interference_size;/*: Maximum
+		size in bytes of contiguous memory to promote true sharing */
+	std::cout << "min size to avoid false sharing: " << std::hardware_destructive_interference_size; /*: Minimum
+		offset in bytes between two objects to avoid false sharing*/
+
+	//SLEEP
+	using namespace std::chrono_literals;
+	std::cout << "Hello waiter\n" << std::flush;
+	auto start = std::chrono::high_resolution_clock::now();
+	std::this_thread::sleep_for(2s);
+	auto end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double, std::milli> elapsed = end - start;
+	std::cout << "Waited " << elapsed.count() << " ms\n";
+	WS();
+	//you can get the RESULTS of the top level function ran in a thread through a PROMISE (or the exception if an exception occurred) 
+	// or by modifying shared variables  which may require synchronization, see std::mutex and std::atomic)
+
+	//PROMISE:
+
+	//PACKAGED TASK
+
+	//ASYNC
+	std::future<int> answer = std::async(gcd, 123, 6);
+	//do other stuff:
+	std::cout << "smth smth" << std::endl;
+	std::cout << answer.get() << std::endl;
+	//auto status = answer.wait_for(0s);
+	//status
+	//Mutual exlusion
+
+	/**/
+
 
 }
