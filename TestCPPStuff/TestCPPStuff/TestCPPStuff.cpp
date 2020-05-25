@@ -57,6 +57,26 @@ TestClass createTestClass() {
 
 	return TestClass();
 }
+
+
+class scoped_thread
+{
+	TestClass t;
+public:
+	explicit scoped_thread(TestClass t_) :
+		t(std::move(t_))
+	{
+		//if (!t.joinable())
+			//throw std::logic_error("No thread");
+	}
+	~scoped_thread()
+	{
+		//t.join();
+	}
+	scoped_thread(scoped_thread const&) = delete;
+	scoped_thread& operator=(scoped_thread const&) = delete;
+};
+
 int main()
 {
 
@@ -122,6 +142,12 @@ int main()
 	
 
 
-
+	//out of scoped_thread example
+	WL("Scoped Thread example");
+	//https://stackoverflow.com/questions/18222926/why-is-list-initialization-using-curly-braces-better-than-the-alternatives
+	//https://en.cppreference.com/w/cpp/language/list_initialization
+	scoped_thread sthr(TestClass{});
+	WS();
 }
+
 
